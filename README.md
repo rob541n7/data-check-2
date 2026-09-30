@@ -18,7 +18,7 @@ Semua data tersimpan **di HP saja** — tidak ada data yang dikirim ke server.
 - **Progres scan**: jumlah sudah/belum discan, kritis, dan resi yang tidak ada di data.
 - **Ringkasan**: sebaran umur, delivery attempt, dan jumlah per kolom status.
 - **Export ke Excel**: sheet Ringkasan, Hasil Scan, Belum Discan, dan Semua Data.
-- Buka file Excel langsung dari **WhatsApp / File Manager** (“Buka dengan → Data Check 2”).
+- Buka file Excel **langsung dari WhatsApp** / File Manager (“Open with → Data Check 2”) — lihat [Import data](#2-import-data).
 - Laporan crash yang bisa dibagikan, bila aplikasi sempat berhenti.
 
 ## Tampilan
@@ -63,6 +63,10 @@ Semua data tersimpan **di HP saja** — tidak ada data yang dikirim ke server.
   |---|---|---|---|
   | JX1000000001 | 7 | 2 | Scan Paket Bermasalah |
 
+**Tips untuk file longtail:** dari file longtail gabungan yang dibagikan di grup, **filter per DP**, lalu sisakan
+4 kolom saja: **No. Waybill, UMUR PAKET, DELIVERY ATTEMPT, Jenis Scan**. Simpan sebagai .xlsx dan kirim ke DP
+masing-masing lewat WhatsApp. File lebih kecil dan kartu hasil scan lebih ringkas.
+
 Kolom **umur** boleh berisi:
 
 - **Angka** (`5`, `5 hari`, `H+5`) → dianggap umur **pada hari file diimport**, lalu bertambah otomatis setiap hari.
@@ -71,8 +75,20 @@ Kolom **umur** boleh berisi:
 
 ### 2. Import data
 
+**Cara tercepat — langsung dari WhatsApp** (tanpa perlu menyimpan file dulu):
+
+1. Di chat atau grup WhatsApp, ketuk file Excel yang dikirim (misalnya file longtail per DP).
+2. Muncul pilihan **“Open with / Buka dengan”** → pilih **Data Check 2**.
+3. Tekan **Once / Sekali saja**. (Jangan pilih **Always / Selalu**, supaya file Excel lain tetap bisa dibuka dengan Excel.)
+4. Data Check 2 terbuka dan langsung menampilkan dialog import (lihat langkah 2 di bawah).
+
+<img src="docs/screenshots/08-buka-dari-whatsapp.png" alt="Buka file Excel dari WhatsApp dengan Data Check 2" width="420">
+
+Cara yang sama berlaku dari **File Manager**, **Google Drive**, atau aplikasi lain: buka / bagikan (**Share**) file Excel → pilih **Data Check 2**.
+
+**Atau dari dalam aplikasi:**
+
 1. Buka tab **Data** → tekan **Import Excel**, pilih file.
-   (Atau dari WhatsApp/File Manager: buka file → **Buka dengan → Data Check 2**.)
 2. Muncul dialog berisi semua kolom yang terbaca dan contoh baris pertama. Aplikasi otomatis memilih:
    - **Kolom No. Resi**
    - **Kolom dasar umur**
