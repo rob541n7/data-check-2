@@ -1,0 +1,20 @@
+# Build
+build/
+.gradle/
+.kotlin/
+*.apk
+*.aab
+build.log
+
+# Lokal / IDE
+local.properties
+.idea/
+*.iml
+.DS_Store
+hs_err_pid*.log
+
+# Kunci tanda tangan — JANGAN pernah diunggah
+keystore/
+keystore.properties
+*.jks
+*.keystore

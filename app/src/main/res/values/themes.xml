@@ -1,0 +1,4 @@
+<resources>
+    <color name="launcher_bg">#1F3A93</color>
+    <style name="Theme.DataCheck" parent="android:Theme.Material.Light.NoActionBar" />
+</resources>
