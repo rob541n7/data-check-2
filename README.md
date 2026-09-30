@@ -21,6 +21,24 @@ Semua data tersimpan **di HP saja** — tidak ada data yang dikirim ke server.
 - Buka file Excel langsung dari **WhatsApp / File Manager** (“Buka dengan → Data Check 2”).
 - Laporan crash yang bisa dibagikan, bila aplikasi sempat berhenti.
 
+## Tampilan
+
+> Screenshot memakai data contoh (nomor resi palsu). Gambar kamera diganti ilustrasi label.
+
+| Scan — hasil kritis | Scan — mode QR | Data paket |
+|---|---|---|
+| ![Scan kritis](docs/screenshots/01-scan-kritis.png) | ![Mode QR](docs/screenshots/02-scan-mode-qr.png) | ![Data](docs/screenshots/03-data.png) |
+
+| Import — pilih kolom | Pengaturan | Laporan crash |
+|---|---|---|
+| ![Import](docs/screenshots/04-import-pilih-kolom.png) | ![Pengaturan](docs/screenshots/06-pengaturan.png) | ![Crash](docs/screenshots/07-laporan-crash.png) |
+
+<details>
+<summary><b>Ringkasan</b> (klik untuk melihat)</summary>
+
+<img src="docs/screenshots/05-ringkasan.png" alt="Ringkasan" width="360">
+</details>
+
 ## Cara Instal
 
 1. Buka halaman **[Releases](../../releases)** repo ini dan unduh file **`Data-Check-2-vX.Y.Z.apk`** versi terbaru.
@@ -78,7 +96,7 @@ Buka tab **Scan** dan arahkan kamera ke barcode resi. Hasil muncul dalam kartu b
 | 🔵 Biru | **SUDAH DISCAN** sebelumnya (scan ulang) | bip ganda |
 | 🟣 Ungu | **TIDAK ADA DI DATA** | bunyi error |
 
-Tombol di pojok kanan atas layar kamera:
+Tombol di bagian atas layar kamera (kiri ke kanan):
 
 - 🔦 **Senter** — untuk tempat gelap.
 - ⏸ **Jeda / lanjut** scan.
@@ -122,7 +140,7 @@ Kebutuhan: Android Studio (JDK 21) dan Android SDK 36.
 git clone https://github.com/rob541n7/data-check-2.git
 cd data-check-2
 ./gradlew assembleDebug          # APK debug: app/build/outputs/apk/debug/
-./gradlew testDebugUnitTest      # tes pembaca Excel, tanggal, QR, dll
+./gradlew testDebugUnitTest      # tes pembaca Excel, tanggal, QR, dll + membuat ulang screenshot di docs/screenshots
 ```
 
 Build release yang ditandatangani: buat kunci dengan `keytool`, salin `keystore.properties.example` menjadi
@@ -136,6 +154,7 @@ Teknologi: Kotlin, Jetpack Compose (Material 3), CameraX, ML Kit Barcode Scannin
 
 | Versi | Perubahan |
 |---|---|
+| 2.2.4 | Tata letak layar Scan: tombol kamera berjejer (tombol Ketik resi tidak lagi tertutup), bingkai QR menyesuaikan area kamera, area kamera lebih lega di HP layar kecil |
 | 2.2.3 | Pembacaan Excel streaming (memperbaiki kehabisan memori di Android 16); batas pengaman ukuran file |
 | 2.2.2 | Kamera lebih stabil di berbagai HP; layar laporan crash dengan tombol Bagikan |
 | 2.2.1 | Perbaikan crash saat scan (shrinking R8 dinonaktifkan); pencatat crash |

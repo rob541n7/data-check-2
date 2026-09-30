@@ -89,7 +89,7 @@ fun SettingsScreen(vm: AppViewModel) {
             }
         }
         Text(
-            "Data Check 2 • versi 2.2.3",
+            "Data Check 2 • versi 2.2.4",
             Modifier.fillMaxWidth().padding(8.dp), fontSize = 12.sp, color = MaterialTheme.colorScheme.outline,
         )
     }

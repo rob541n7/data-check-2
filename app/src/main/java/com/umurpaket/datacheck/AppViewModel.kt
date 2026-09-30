@@ -3,6 +3,7 @@ package com.umurpaket.datacheck
 import android.app.Application
 import android.net.Uri
 import android.provider.OpenableColumns
+import androidx.annotation.VisibleForTesting
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateListOf
@@ -88,6 +89,22 @@ class AppViewModel(private val app: Application) : AndroidViewModel(app) {
     }
 
     fun aging() = Aging(settings, LocalDate.now().toEpochDay())
+
+    /** Hanya untuk screenshot dokumentasi: isi data contoh langsung ke memori (tidak ditulis ke DB). */
+    @VisibleForTesting
+    internal fun seedDemo(m: Meta, items: List<Pkg>, history: List<ScanRecord>, result: ScanResult?, pending: PendingImport? = null) {
+        meta = m
+        pkgMap = HashMap(items.associateBy { it.resi })
+        scans.clear()
+        scans.addAll(history)
+        lastResult = result
+        pendingImport = pending
+        version++
+    }
+
+    /** Menunggu data awal dari DB selesai dimuat (dipakai tes). */
+    @VisibleForTesting
+    internal suspend fun awaitLoaded() = loadJob.join()
 
     fun consumeMessage() { message = null }
 

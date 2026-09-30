@@ -64,7 +64,15 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.foundation.Canvas
+import androidx.compose.foundation.layout.BoxWithConstraints
+import androidx.compose.foundation.layout.offset
+import androidx.compose.ui.unit.coerceAtLeast
+import androidx.compose.ui.geometry.CornerRadius
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Size as GSize
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalInspectionMode
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
@@ -98,8 +106,10 @@ private val timeFmt = SimpleDateFormat("HH:mm:ss", Locale.US)
 @Composable
 fun ScanScreen(vm: AppViewModel) {
     val ctx = LocalContext.current
+    // Mode pratinjau/screenshot dokumentasi: tanpa kamera sungguhan
+    val inspection = LocalInspectionMode.current
     var hasCam by remember {
-        mutableStateOf(ContextCompat.checkSelfPermission(ctx, Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED)
+        mutableStateOf(inspection || ContextCompat.checkSelfPermission(ctx, Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED)
     }
     val permLauncher = rememberLauncherForActivityResult(ActivityResultContracts.RequestPermission()) { hasCam = it }
     LaunchedEffect(Unit) { if (!hasCam) permLauncher.launch(Manifest.permission.CAMERA) }
@@ -111,17 +121,25 @@ fun ScanScreen(vm: AppViewModel) {
     val v = vm.version
     val stats = remember(v, vm.settings) { vm.scanStats() }
 
+    BoxWithConstraints(Modifier.fillMaxSize()) {
+    // Area kamera proporsional terhadap layar (min 170dp) supaya tetap cukup untuk membidik di HP kecil
+    val small = maxHeight < 560.dp
+    val camHeight = (maxHeight * if (small) 0.36f else 0.34f).coerceAtLeast(170.dp)
     Column(Modifier.fillMaxSize()) {
-        Box(Modifier.fillMaxWidth().weight(0.8f).background(Color.Black)) {
+        BoxWithConstraints(Modifier.fillMaxWidth().height(camHeight).background(Color.Black)) {
+            // ruang bebas di antara baris tombol (atas, ±56dp) dan baris angka (bawah, ±30dp)
+            val free = (maxHeight - 96.dp).coerceAtLeast(48.dp)
             if (hasCam) {
-                CameraScanner(Modifier.fillMaxSize(), torch, paused, vm::onCodes)
-                val guide = if (vm.qrOnly) Modifier.size(190.dp) else Modifier.fillMaxWidth(0.82f).height(84.dp)
+                if (inspection) CameraMock(Modifier.fillMaxSize())
+                else CameraScanner(Modifier.fillMaxSize(), torch, paused, vm::onCodes)
+                val guide = if (vm.qrOnly) Modifier.size(minOf(190.dp, free, maxWidth * 0.6f))
+                else Modifier.fillMaxWidth(0.82f).height(minOf(84.dp, free))
                 Box(
-                    Modifier.align(Alignment.Center).then(guide)
+                    Modifier.align(Alignment.Center).offset(y = 13.dp).then(guide)
                         .border(2.dp, if (vm.qrOnly) Color(0xFF80D8FF) else Color.White.copy(alpha = 0.85f), RoundedCornerShape(12.dp)),
                 )
                 Text(
-                    if (vm.qrOnly) "MODE QR — arahkan ke kotak QR di label" else "Barcode / QR",
+                    if (vm.qrOnly) "MODE QR" else "Barcode / QR",
                     Modifier.align(Alignment.TopStart).padding(10.dp).background(Color.Black.copy(alpha = 0.55f), RoundedCornerShape(6.dp))
                         .padding(horizontal = 8.dp, vertical = 3.dp),
                     color = if (vm.qrOnly) Color(0xFF80D8FF) else Color.White, fontSize = 12.sp, fontWeight = FontWeight.Bold,
@@ -139,28 +157,30 @@ fun ScanScreen(vm: AppViewModel) {
                     Button(onClick = { permLauncher.launch(Manifest.permission.CAMERA) }) { Text("Izinkan kamera") }
                 }
             }
-            Column(Modifier.align(Alignment.TopEnd).padding(8.dp), verticalArrangement = gapSmall) {
+            // tombol dijejer mendatar supaya tetap muat walau area kamera pendek
+            Row(Modifier.align(Alignment.TopEnd).padding(8.dp), horizontalArrangement = Arrangement.spacedBy(6.dp)) {
                 val colors = IconButtonDefaults.filledTonalIconButtonColors(containerColor = Color.White.copy(alpha = 0.85f))
-                FilledTonalIconButton(onClick = { torch = !torch }, colors = if (torch) IconButtonDefaults.filledTonalIconButtonColors(containerColor = Color(0xFFFFE082)) else colors) {
+                val torchOn = IconButtonDefaults.filledTonalIconButtonColors(containerColor = Color(0xFFFFE082))
+                val qrOn = IconButtonDefaults.filledTonalIconButtonColors(containerColor = Color(0xFF80D8FF))
+                val manualOn = IconButtonDefaults.filledTonalIconButtonColors(containerColor = Color(0xFFC5CAE9))
+                val btn = Modifier.size(42.dp)
+                FilledTonalIconButton(onClick = { torch = !torch }, btn, colors = if (torch) torchOn else colors) {
                     Icon(painterResource(R.drawable.ic_torch), "Senter")
                 }
-                FilledTonalIconButton(onClick = { paused = !paused }, colors = colors) {
+                FilledTonalIconButton(onClick = { paused = !paused }, btn, colors = colors) {
                     if (paused) Icon(Icons.Default.PlayArrow, "Lanjut") else Icon(painterResource(R.drawable.ic_pause), "Jeda")
                 }
-                FilledTonalIconButton(
-                    onClick = { vm.qrOnly = !vm.qrOnly },
-                    colors = if (vm.qrOnly) IconButtonDefaults.filledTonalIconButtonColors(containerColor = Color(0xFF80D8FF)) else colors,
-                ) {
+                FilledTonalIconButton(onClick = { vm.qrOnly = !vm.qrOnly }, btn, colors = if (vm.qrOnly) qrOn else colors) {
                     Icon(painterResource(R.drawable.ic_qr), "Mode QR")
                 }
-                FilledTonalIconButton(onClick = { showManual = !showManual }, colors = colors) {
+                FilledTonalIconButton(onClick = { showManual = !showManual }, btn, colors = if (showManual) manualOn else colors) {
                     Icon(Icons.Default.Edit, "Ketik resi")
                 }
             }
             StatsBar(stats, Modifier.align(Alignment.BottomStart))
         }
 
-        ResultCard(vm.lastResult, vm.settings, vm.meta.columns)
+        ResultCard(vm.lastResult, vm.settings, vm.meta.columns, compact = small)
 
         if (showManual) {
             Row(Modifier.fillMaxWidth().padding(horizontal = 12.dp), verticalAlignment = Alignment.CenterVertically) {
@@ -193,6 +213,7 @@ fun ScanScreen(vm: AppViewModel) {
             }
         }
     }
+    }
 }
 
 @Composable
@@ -208,7 +229,7 @@ private fun StatsBar(s: com.umurpaket.datacheck.ScanStats, modifier: Modifier) {
 }
 
 @Composable
-private fun ResultCard(r: ScanResult?, s: Settings, cols: Columns) {
+private fun ResultCard(r: ScanResult?, s: Settings, cols: Columns, compact: Boolean = false) {
     val level = r?.rec?.level
     val bg by animateColorAsState(
         when {
@@ -251,8 +272,10 @@ private fun ResultCard(r: ScanResult?, s: Settings, cols: Columns) {
             }
             val p = r.pkg
             if (p != null) {
-                // semua kolom file, dengan nama kolom sesuai judul di Excel
-                for (i in cols.others) {
+                // semua kolom file, dengan nama kolom sesuai judul di Excel.
+                // Layar kecil: cukup 2 kolom (attempt diutamakan) supaya kamera tetap lega.
+                val shown = if (!compact) cols.others else (cols.others.filter { it == cols.attempt } + cols.others.filter { it != cols.attempt && it !in cols.age }).take(2)
+                for (i in shown) {
                     val v = p.values.getOrNull(i).orEmpty()
                     if (v.isBlank()) continue
                     val high = i == cols.attempt && (p.attempt ?: 0) >= s.attemptWarn
@@ -291,6 +314,38 @@ private fun HistoryRow(r: ScanRecord) {
         AgeBadge(r.age, r.level)
     }
     HorizontalDivider(Modifier.padding(start = 32.dp), color = Color(0xFFEDEEF3))
+}
+
+/** Pengganti gambar kamera untuk pratinjau/screenshot dokumentasi: label paket tiruan. */
+@Composable
+private fun CameraMock(modifier: Modifier) {
+    Canvas(modifier.background(Color(0xFF3A3F47))) {
+        val w = size.width * 0.78f
+        val h = size.height * 0.62f
+        val left = (size.width - w) / 2
+        val top = (size.height - h) / 2
+        drawRoundRect(Color(0xFFF3F1EA), Offset(left, top), GSize(w, h), CornerRadius(18f))
+        // barcode garis
+        val bx = left + w * 0.1f
+        val bw = w * 0.8f
+        val by = top + h * 0.4f
+        val bh = h * 0.24f
+        var x = bx
+        var i = 0
+        while (x < bx + bw) {
+            val lw = if (i % 3 == 0) 7f else if (i % 2 == 0) 4f else 2.5f
+            drawRect(Color(0xFF1A1A1A), Offset(x, by), GSize(lw, bh))
+            x += lw + if (i % 4 == 0) 7f else 4f
+            i++
+        }
+        // teks & QR tiruan
+        drawRect(Color(0xFF1A1A1A), Offset(left + w * 0.1f, top + h * 0.12f), GSize(w * 0.35f, h * 0.05f))
+        drawRect(Color(0xFF9E9E9E), Offset(left + w * 0.1f, top + h * 0.22f), GSize(w * 0.5f, h * 0.035f))
+        drawRect(Color(0xFF1A1A1A), Offset(left + w * 0.7f, top + h * 0.08f), GSize(w * 0.2f, w * 0.2f))
+        drawRect(Color(0xFFF3F1EA), Offset(left + w * 0.73f, top + h * 0.08f + w * 0.03f), GSize(w * 0.14f, w * 0.14f))
+        drawRect(Color(0xFF1A1A1A), Offset(left + w * 0.76f, top + h * 0.08f + w * 0.06f), GSize(w * 0.08f, w * 0.08f))
+        drawRect(Color(0xFF1A1A1A), Offset(left + w * 0.25f, top + h * 0.72f), GSize(w * 0.5f, h * 0.05f))
+    }
 }
 
 @OptIn(ExperimentalGetImage::class)

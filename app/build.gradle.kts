@@ -24,8 +24,8 @@ android {
         applicationId = "com.umurpaket.datacheck"
         minSdk = 26
         targetSdk = 36
-        versionCode = 7
-        versionName = "2.2.3"
+        versionCode = 8
+        versionName = "2.2.4"
         ndk { abiFilters += listOf("arm64-v8a", "armeabi-v7a") }
     }
 
@@ -52,6 +52,9 @@ android {
     buildFeatures {
         compose = true
     }
+    testOptions {
+        unitTests.isIncludeAndroidResources = true
+    }
 }
 
 dependencies {
@@ -72,9 +75,19 @@ dependencies {
     implementation("com.google.mlkit:barcode-scanning:17.3.0")
     testImplementation("junit:junit:4.13.2")
     testImplementation("net.sf.kxml:kxml2:2.3.0")
+    // screenshot menu untuk dokumentasi (./gradlew testDebugUnitTest --tests "*ScreenshotTest*")
+    testImplementation(platform("androidx.compose:compose-bom:2026.02.01"))
+    testImplementation("androidx.compose.ui:ui-test-junit4")
+    debugImplementation("androidx.compose.ui:ui-test-manifest")
+    testImplementation("org.robolectric:robolectric:4.17")
+    testImplementation("io.github.takahirom.roborazzi:roborazzi:1.76.0")
+    testImplementation("io.github.takahirom.roborazzi:roborazzi-compose:1.76.0")
 }
 
 tasks.withType<Test>().configureEach {
+    maxHeapSize = "1536m"
+    systemProperty("roborazzi.test.record", "true")
+    systemProperty("robolectric.pixelCopyRenderMode", "hardware")
     testLogging {
         showStandardStreams = true
         events("passed", "failed")

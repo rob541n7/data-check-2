@@ -102,7 +102,7 @@ class MainActivity : ComponentActivity() {
 
 /** Layar laporan crash: bisa dibagikan (WhatsApp dll) atau disalin, sebelum aplikasi dilanjutkan. */
 @Composable
-private fun CrashScreen(text: String, onContinue: () -> Unit) {
+internal fun CrashScreen(text: String, onContinue: () -> Unit) {
     val ctx = LocalContext.current
     Column(Modifier.fillMaxSize().background(Color.White).systemBarsPadding().padding(16.dp)) {
         Text("Aplikasi sempat berhenti", fontSize = 20.sp, fontWeight = FontWeight.Bold)
@@ -142,7 +142,7 @@ private val tabs = listOf(
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun AppRoot(vm: AppViewModel, startTab: Int = 0) {
+internal fun AppRoot(vm: AppViewModel, startTab: Int = 0) {
     var tab by rememberSaveable { mutableIntStateOf(startTab) }
     val snack = remember { SnackbarHostState() }
     LaunchedEffect(vm.message) {
